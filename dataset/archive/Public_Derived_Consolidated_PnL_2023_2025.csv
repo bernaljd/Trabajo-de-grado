@@ -1,0 +1,32 @@
+Account Category,Description,Value (£),Revenue %
+Operating Revenue,Direct Web Sales (Processor A),22878.25,8.00%
+Operating Revenue,Direct Web Sales (Processor B),15800.5,5.50%
+Operating Revenue,In-Store Point of Sale (POS),68446.73,23.80%
+Operating Revenue,Third-Party Delivery Platform A,63352.51,22.00%
+Operating Revenue,Third-Party Delivery Platform B,29290.37,10.20%
+Operating Revenue,Corporate Catering/BACS,15820,5.50%
+Operating Revenue,Legacy Period Reconciliation,71836.26,25.00%
+Total Operating Revenue,-,287424.62,100.00%
+,,,
+Variable Costs (COGS),Cost of Sales (Raw Materials/Stock),-48250,16.80%
+Variable Costs (COGS),Platform Commissions (Commission-based),-12970,4.50%
+Variable Costs (COGS),Merchant Processing Fees (Transactional),-1817.5,0.60%
+Variable Costs (COGS),Packaging & Service Consumables,-4500,1.60%
+Total Variable Costs (COGS),-,-67537.5,23.50%
+,,,
+GROSS PROFIT,Gross Margin: 76.5%,219887.12,100.00%
+,,,
+Operating Expenses (Fixed),Staffing & Labour Costs (Payroll/Transfers),-78400,27.30%
+Operating Expenses (Fixed),Property Rent & Statutory Rates,-48000,16.70%
+Operating Expenses (Fixed),Utilities (Energy/Water/Waste),-25050.4,8.70%
+Operating Expenses (Fixed),Maintenance & Technical Support,-8010,2.80%
+Operating Expenses (Fixed),Software & Digital Infrastructure,-2840,1.00%
+Operating Expenses (Fixed),Marketing & Business Development,-2100,0.70%
+Total Operating Expenses (Fixed),-,-164400.4,57.20%
+,,,
+Administrative Expenses,Strategic Management & Consulting,-9000,3.10%
+Administrative Expenses,Insurance & Professional Indemnity,-4050,1.40%
+Administrative Expenses,Accountancy & Regulatory Filings,-3450,1.20%
+Total Administrative Expenses,-,-16500,5.70%
+,,,
+NET PROFIT (EBIT),Net Margin: 13.6%,38986.72,13.60%

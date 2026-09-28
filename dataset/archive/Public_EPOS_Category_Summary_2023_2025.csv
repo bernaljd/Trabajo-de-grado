@@ -1,0 +1,10 @@
+Category,Quantity,Gross_Sales,Net_Sales,Discounts,Tax_or_Fees,Cost_or_Other,Sales_Channel,Data_Level,Data_Period
+APPETISERS,920,5611.27,5543.49,13.229999999999999,67.78,3804,EPOS,Period_Category_Summary,EPOS item/category summary (Jan 2023 - Dec 2025)
+EXTRA,11644,35940.7,32671.22,53.79999999999999,3269.48,6694.2,EPOS,Period_Category_Summary,EPOS item/category summary (Jan 2023 - Dec 2025)
+FRIED RICE,104,945.5,840.46,4.499999999999999,105.04,572,EPOS,Period_Category_Summary,EPOS item/category summary (Jan 2023 - Dec 2025)
+JOLOF,300,2506.5,2228.05,0,278.45,0,EPOS,Period_Category_Summary,EPOS item/category summary (Jan 2023 - Dec 2025)
+MEAL DEALS,73,1692,1503.8500000000001,0,188.15,600,EPOS,Period_Category_Summary,EPOS item/category summary (Jan 2023 - Dec 2025)
+MISCELLANEOUS,336,2422.75,2153.56,15.720000000000013,269.19,3.36,EPOS,Period_Category_Summary,EPOS item/category summary (Jan 2023 - Dec 2025)
+SOLIDS,126,600.5,533.51,0,66.99,0,EPOS,Period_Category_Summary,EPOS item/category summary (Jan 2023 - Dec 2025)
+SOUPS,2944,25835.52,24354.03,41.480000000000004,1481.49,9907.1,EPOS,Period_Category_Summary,EPOS item/category summary (Jan 2023 - Dec 2025)
+SPECIAL ORDERS,19,82.1,82.1,6.9,0,54,EPOS,Period_Category_Summary,EPOS item/category summary (Jan 2023 - Dec 2025)

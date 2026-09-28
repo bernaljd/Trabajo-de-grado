@@ -1,0 +1,236 @@
+﻿Year,Month,Category,Quantity,Gross_Revenue,Sales_Channel,Data_Level,Data_Period
+2023,August,Appetisers,26,126.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,August,Drinks,3,7,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,August,Extras,51,163,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,August,Main Courses,41,301.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,August,Modifiers,53,57.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,August,Solids,6,23,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,August,Soups,25,177,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,December,Appetisers,21,121,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,December,Drinks,7,11,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,December,Extras,104,316.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,December,Main Courses,48,349,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,December,Modifiers,50,59,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,December,Promotional Bundles,1,22.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,December,Solids,8,29,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,December,Soups,13,95.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,July,Appetisers,39,170,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,July,Drinks,7,17,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,July,Extras,87,284.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,July,Main Courses,50,373,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,July,Modifiers,51,75,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,July,Solids,6,24,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,July,Soups,21,150.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,June,Appetisers,41,125.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,June,Drinks,3,6,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,June,Extras,45,109.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,June,Main Courses,27,196,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,June,Modifiers,39,37,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,June,Solids,10,41,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,June,Soups,17,120,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,May,Appetisers,13,74,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,May,Drinks,6,15,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,May,Extras,20,39,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,May,Main Courses,27,204,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,May,Modifiers,17,22.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,May,Solids,5,19.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,May,Soups,6,43,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,November,Appetisers,37,129.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,November,Drinks,18,46,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,November,Extras,77,241,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,November,Main Courses,62,471,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,November,Modifiers,39,38,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,November,Solids,15,54.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,November,Soups,19,145,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,October,Appetisers,26,125.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,October,Drinks,17,28,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,October,Extras,53,138.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,October,Main Courses,72,542,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,October,Modifiers,81,129.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,October,Solids,12,42,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,October,Soups,36,265,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,September,Appetisers,21,84.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,September,Drinks,4,7,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,September,Extras,58,178.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,September,Main Courses,42,312,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,September,Modifiers,55,73.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,September,Promotional Bundles,1,32.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,September,Solids,9,33.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2023,September,Soups,29,207,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,April,Appetisers,22,114.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,April,Drinks,13,29,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,April,Extras,67,245,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,April,Main Courses,55,442.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,April,Modifiers,53,85,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,April,Solids,12,44,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,April,Soups,23,172.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,August,Appetisers,24,127.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,August,Drinks,9,21,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,August,Extras,48,211,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,August,Main Courses,19,150.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,August,Modifiers,17,17.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,August,Solids,10,39,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,August,Soups,14,119,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,December,Appetisers,43,187,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,December,Drinks,42,54.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,December,Extras,45,175,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,December,Main Courses,74,651,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,December,Modifiers,19,30,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,December,Solids,13,53.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,December,Soups,22,206,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,February,Appetisers,41,233,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,February,Drinks,8,14,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,February,Extras,83,267,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,February,Main Courses,46,347,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,February,Modifiers,42,53,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,February,Promotional Bundles,1,22.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,February,Solids,7,28.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,February,Soups,21,160.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,January,Appetisers,18,103.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,January,Drinks,16,24,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,January,Extras,62,165.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,January,Main Courses,35,266,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,January,Modifiers,40,68.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,January,Solids,7,26.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,January,Soups,20,146.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,July,Appetisers,28,137.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,July,Drinks,14,33,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,July,Extras,38,118,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,July,Main Courses,33,271,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,July,Modifiers,26,40,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,July,Solids,7,28.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,July,Soups,12,94,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,June,Appetisers,18,94,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,June,Drinks,12,28,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,June,Extras,39,133.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,June,Main Courses,23,182,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,June,Modifiers,38,58,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,June,Solids,8,30,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,June,Soups,18,138.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,March,Appetisers,27,163.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,March,Drinks,5,9,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,March,Extras,60,217.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,March,Main Courses,39,298,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,March,Modifiers,45,89,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,March,Promotional Bundles,1,32.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,March,Solids,11,42.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,March,Soups,23,175,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,May,Appetisers,20,104,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,May,Drinks,13,26,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,May,Extras,53,176.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,May,Main Courses,36,289,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,May,Modifiers,40,54.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,May,Solids,9,37.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,May,Soups,20,153.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,November,Appetisers,54,230.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,November,Drinks,55,58.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,November,Extras,29,114.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,November,Main Courses,68,568,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,November,Modifiers,39,42,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,November,Solids,4,14,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,November,Soups,11,87,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,October,Appetisers,62,212,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,October,Drinks,34,39,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,October,Extras,58,260,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,October,Main Courses,73,567,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,October,Modifiers,62,51,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,October,Solids,13,49.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,October,Soups,15,124,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,September,Appetisers,36,232,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,September,Drinks,15,30,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,September,Extras,63,231.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,September,Main Courses,31,251,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,September,Modifiers,21,37,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,September,Solids,6,22,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2024,September,Soups,13,109,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,April,Appetisers,29,177.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,April,Drinks,9,21.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,April,Extras,32,134,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,April,Main Courses,22,198.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,April,Modifiers,3,3.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,April,Promotional Bundles,1,35,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,April,Solids,12,46,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,April,Soups,13,113,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,August,Appetisers,30,132.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,August,Drinks,11,17,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,August,Extras,37,189,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,August,Main Courses,30,266.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,August,Modifiers,15,19.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,August,Solids,10,36,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,August,Soups,18,157.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,December,Appetisers,29,177.32,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,December,Drinks,2,6,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,December,Extras,32,150,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,December,Main Courses,15,133.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,December,Modifiers,21,37.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,December,Solids,13,45.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,December,Soups,26,223.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,February,Appetisers,43,253,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,February,Drinks,12,26,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,February,Extras,34,129,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,February,Main Courses,24,219.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,February,Modifiers,12,9,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,February,Promotional Bundles,5,145,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,February,Solids,9,36.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,February,Soups,10,88.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,January,Appetisers,56,298,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,January,Drinks,13,28.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,January,Extras,54,284,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,January,Main Courses,22,200,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,January,Modifiers,20,26.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,January,Solids,15,59.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,January,Soups,21,189.35,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,July,Appetisers,29,186,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,July,Drinks,6,10,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,July,Extras,34,162.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,July,Main Courses,25,223,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,July,Modifiers,18,13.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,July,Solids,16,65,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,July,Soups,21,191,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,June,Appetisers,37,215,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,June,Drinks,15,36,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,June,Extras,69,341,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,June,Main Courses,35,308,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,June,Modifiers,20,22,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,June,Solids,15,55.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,June,Soups,23,204.35,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,March,Appetisers,37,196,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,March,Drinks,8,23.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,March,Extras,49,232,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,March,Main Courses,18,166.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,March,Modifiers,8,1.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,March,Promotional Bundles,3,75,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,March,Solids,10,41,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,March,Soups,16,148,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,May,Appetisers,44,249,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,May,Drinks,7,10,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,May,Extras,35,125.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,May,Main Courses,17,153,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,May,Modifiers,7,10.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,May,Promotional Bundles,3,85,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,May,Solids,14,54,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,May,Soups,19,159.85,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,November,Appetisers,16,108,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,November,Drinks,7,16,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,November,Extras,36,135.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,November,Main Courses,16,143,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,November,Modifiers,9,7,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,November,Promotional Bundles,1,25,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,November,Solids,7,24.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,November,Soups,10,83,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,October,Appetisers,42,198,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,October,Drinks,10,17.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,October,Extras,45,200.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,October,Main Courses,22,199.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,October,Modifiers,17,18,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,October,Promotional Bundles,3,85,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,October,Solids,14,53,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,October,Soups,19,170.85,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,September,Appetisers,37,196.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,September,Drinks,9,12,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,September,Extras,51,195.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,September,Main Courses,15,133.5,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,September,Modifiers,22,34,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,September,Promotional Bundles,1,25,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,September,Solids,14,51,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
+2025,September,Soups,24,211,Deliveroo,Monthly_Category_Aggregate,Jan 2023 - Dec 2025
