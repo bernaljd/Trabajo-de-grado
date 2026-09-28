@@ -46,9 +46,12 @@ plt.xticks(rotation=45, ha='right') # Rota los textos para que se lean bien
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.tight_layout()
 
+for i, valor in enumerate(conteo_semanal):
+    plt.text(i, valor + 3, str(valor), ha='center', va='bottom', fontsize=8)
+
 # Guardar la imagen sin pausar el programa
-#plt.savefig('images/daysChart.png')
-#plt.show()
+plt.savefig('images/daysChart.png')
+plt.show()
 
 ####################################################
 
