@@ -15,9 +15,11 @@ archiveLoc = '../../dataset/archive/Anonymized_Restaurant_Sales_Data.csv'
 df = pd.read_csv(archiveLoc)
 
 # Test
-# print("Dimension de los datos: ", df.shape)
+print("Dimension de los datos: ", df.shape)
 # Columns info
-# print(df.info())
+print(df.info())    
+print(df.head(10))
+print(df['Category'].unique())
 
 # Convert 'Date' format to DD/MM/YYYY
 df['Date'] = pd.to_datetime(df['Date'], dayfirst=True)
@@ -51,13 +53,9 @@ for i, valor in enumerate(conteo_semanal):
 
 # Guardar la imagen sin pausar el programa
 plt.savefig('images/daysChart.png')
-plt.show()
+#plt.show()
 
 ####################################################
-
-# 1. Leer el archivo
-archiveLoc = '../../dataset/archive/Anonymized_Restaurant_Sales_Data.csv'
-df = pd.read_csv(archiveLoc)
 
 # 2. Convertir 'Date' a formato de tiempo
 df['Date'] = pd.to_datetime(df['Date'], dayfirst=True)
@@ -130,3 +128,6 @@ for i, valor in enumerate(conteo_meses):
 # Guardar la imagen
 plt.savefig('images/grafico_12_meses.png')
 #print("¡Gráfico de 12 meses generado exitosamente!")
+
+
+# Numerar las semanas del año 1..52, contestar preguntas semanales
