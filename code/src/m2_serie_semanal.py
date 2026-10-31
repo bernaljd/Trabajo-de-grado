@@ -20,7 +20,7 @@ Uso (desde code/src, después de M1):
   python3 m2_serie_semanal.py
 """
 
-import pandas as pd
+import pandas as pd # type: ignore 
 
 # Última semana del conjunto de entrenamiento (cap. 6, partición cronológica)
 FIN_ENTRENAMIENTO = pd.Timestamp('2024-12-30')

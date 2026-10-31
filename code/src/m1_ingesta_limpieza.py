@@ -19,7 +19,7 @@ Uso (desde code/src):
   python3 m1_ingesta_limpieza.py
 """
 
-import pandas as pd
+import pandas as pd # type: ignore 
 
 def filtrar(df, condicion, descripcion):
     # Cantidad de filas a quitar (negamos los valores asi que si hay 0 ventas es True y se suman esos True).

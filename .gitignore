@@ -1,2 +1,4 @@
 .DS_Store
 code/venv
+dataset/raw/archive
+dataset/raw/archive.zip
