@@ -14,9 +14,9 @@ def clasificar_plato(primera_venta, ultima_venta, fin_periodo, inicio_ultimas_se
     # Calcula la edad del plato
     semanas_historia = (fin_periodo - primera_venta).days // 7 + 1
     # un plato que ya no está en el menú no se pronostica
-    # aunque además tenga poca historia.
     if ultima_venta < inicio_ultimas_semanas:
         return 'retirado'
+    # Un plato con poco historial tampoco
     if semanas_historia < SEMANAS_MINIMAS:
         return 'historial_insuficiente'
     return 'modelable'
@@ -53,18 +53,18 @@ df.set_index('fecha', inplace=True)
 # S2: se suman unidades, ventas, costo y margen por plato y semana
 # ---------------------------------------------------------------------------
 
-# S1: 'W-MON' con label y closed a la izquierda agrupa de lunes a domingo y le pone a cada
-# semana la fecha de su lunes. Primero el total del restaurante, que da las 157 semanas.
+# Agrupa de lunes a domingo. W-MON: W = week  y MON = Monday.
 unidades_semana = df['cantidad'].resample('W-MON', label='left', closed='left').sum()
 
-# Unidades y ventas solo de las líneas cobradas (precio > 0). Sirven para el precio de la semana (S5),
-# para que las 8 líneas de Jolof a precio 0 no bajen el promedio. Las demás quedan en 0.
+# Se descarta el plato Jolof que se vendio a 0. 
 df['unidades_cobradas'] = df['cantidad'].where(df['precio_unitario'] > 0, 0)
 df['ventas_cobradas'] = df['ventas_brutas'].where(df['precio_unitario'] > 0, 0)
 
 # S2: la misma suma, pero separada por plato
 columnas_suma = ['cantidad', 'ventas_brutas', 'costo', 'margen', 'unidades_cobradas', 'ventas_cobradas']
 semanal = df.groupby('plato')[columnas_suma].resample('W-MON', label='left', closed='left').sum()
+
+print(df)
 
 # ---------------------------------------------------------------------------
 # 3. Rejilla completa
