@@ -1,37 +1,19 @@
 """
 M2. Serie de tiempo semanal.
 
-Entrada: dataset/processed/01_ventas_limpias.csv  (salida de M1)
-Salida:  dataset/processed/02_serie_semanal.csv   (una fila por plato y semana)
-Especificación: pipeline/M2_serie_semanal.md
-
-Pasos:
-  1. Ingesta: leer la salida de M1 y poner la fecha como índice.
-  2. Agregación semanal: sumar por plato y semana con resample.
-  3. Rejilla completa: una fila por plato en cada una de las 157 semanas, con 0 si no vendió.
-  4. Columnas calculadas: categoría única, precio de la semana y activo.
-  5. Reglas de negocio: estado_plato (modelable, historial_insuficiente o retirado).
-  6. Controles de calidad: comprobar que el resultado cuadra con M1 y con la tesis.
-  7. Exportación: escribir 02_serie_semanal.csv.
-
-Si un control falla, el script se detiene con un AssertionError y no escribe la salida.
-
 Uso (desde code/src, después de M1):
-  python3 m2_serie_semanal.py
+  python(3) m2_serie_semanal.py
 """
 
-import pandas as pd # type: ignore 
+import pandas as pd
 
-# Última semana del conjunto de entrenamiento (cap. 6, partición cronológica)
-FIN_ENTRENAMIENTO = pd.Timestamp('2024-12-30')
-# Semanas mínimas de historia, y semanas sin ventas al final para considerar un plato retirado
+# Semanas mínimas de historia, y semanas sin ventas al final para considerar un plato retirado.
 SEMANAS_MINIMAS = 26
 
-def clasificar_plato(primera_venta, ultima_venta, inicio_ultimas_semanas):
-    # Semanas entre la primera venta y el fin del entrenamiento, contando las dos. Si el plato
-    # empezó después del entrenamiento el resultado es negativo, por eso el mínimo es 0.
-    semanas_historia = max((FIN_ENTRENAMIENTO - primera_venta).days // 7 + 1, 0)
-    # Primero se revisa si está retirado: un plato que ya no está en el menú no se pronostica,
+def clasificar_plato(primera_venta, ultima_venta, fin_periodo, inicio_ultimas_semanas):
+    # Calcula la edad del plato
+    semanas_historia = (fin_periodo - primera_venta).days // 7 + 1
+    # un plato que ya no está en el menú no se pronostica
     # aunque además tenga poca historia.
     if ultima_venta < inicio_ultimas_semanas:
         return 'retirado'
@@ -135,11 +117,13 @@ serie['activo'] = (serie['semana_inicio'] >= serie['plato'].map(primera_venta)).
 # 5. Reglas de negocio
 # Reglas de estado_plato (cap. 6, §6.1.2)
 # S7: retirado: ninguna venta en las últimas 26 semanas del periodo (desde 2025-07-07)
-#     historial_insuficiente: menos de 26 semanas entre la primera venta y el fin del entrenamiento
+#     historial_insuficiente: menos de 26 semanas entre la primera venta y el fin del periodo
+#     (2025-12-29). Hoy ningún plato cumple esta regla, pero queda para datos futuros
 #     modelable: todos los demás
 # ---------------------------------------------------------------------------
 
-# Lunes en que empiezan las últimas 26 semanas del periodo
+# Lunes de la última semana del periodo, y lunes en que empiezan sus últimas 26 semanas
+fin_periodo = semanas[-1]
 inicio_ultimas_semanas = semanas[-SEMANAS_MINIMAS]
 
 # Una fila por plato con su primera y última semana con ventas
@@ -147,7 +131,7 @@ platos_resumen = serie[serie['unidades'] > 0].groupby('plato')['semana_inicio'].
 
 # S7: se aplica clasificar_plato a cada plato (axis=1 recorre las filas)
 platos_resumen['estado_plato'] = platos_resumen.apply(
-    lambda fila: clasificar_plato(fila['primera_venta'], fila['ultima_venta'], inicio_ultimas_semanas), axis=1)
+    lambda fila: clasificar_plato(fila['primera_venta'], fila['ultima_venta'], fin_periodo, inicio_ultimas_semanas), axis=1)
 
 # Se copia el estado a todas las semanas del plato
 serie['estado_plato'] = serie['plato'].map(platos_resumen['estado_plato'])
@@ -193,11 +177,12 @@ assert (serie.groupby('plato')['categoria'].nunique() == 1).all(), 'Hay platos c
 assert serie.loc[serie['activo'] == 1, 'precio_unitario'].notna().all(), 'Hay semanas activas sin precio'
 assert not ((serie['activo'] == 0) & (serie['unidades'] > 0)).any(), 'Hay ventas en semanas inactivas'
 
-# C7: 45 modelables, 7 con historial insuficiente y 10 retirados
+# C7: 52 modelables, 0 con historial insuficiente y 10 retirados. get(..., 0) porque un estado
+# sin platos no aparece en value_counts
 conteo = platos_resumen['estado_plato'].value_counts()
-assert conteo['modelable'] == 45, f"Modelables: {conteo['modelable']}"
-assert conteo['historial_insuficiente'] == 7, f"Historial insuficiente: {conteo['historial_insuficiente']}"
-assert conteo['retirado'] == 10, f"Retirados: {conteo['retirado']}"
+assert conteo.get('modelable', 0) == 52, f"Modelables: {conteo.get('modelable', 0)}"
+assert conteo.get('historial_insuficiente', 0) == 0, f"Historial insuficiente: {conteo.get('historial_insuficiente', 0)}"
+assert conteo.get('retirado', 0) == 10, f"Retirados: {conteo.get('retirado', 0)}"
 
 # Avisos: no detienen el script, solo informan
 
