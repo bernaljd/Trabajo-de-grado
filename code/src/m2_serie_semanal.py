@@ -22,7 +22,7 @@ Uso (desde code/src, después de M1):
 
 import pandas as pd # type: ignore 
 
-# Última semana del conjunto de entrenamiento (cap. 6, partición cronológica)
+# Última semana del conjunto de entrenamiento 
 FIN_ENTRENAMIENTO = pd.Timestamp('2024-12-30')
 # Semanas mínimas de historia, y semanas sin ventas al final para considerar un plato retirado
 SEMANAS_MINIMAS = 26
