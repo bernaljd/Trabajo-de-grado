@@ -1,25 +1,11 @@
 """
 M2. Serie de tiempo semanal.
 
-Entrada: dataset/processed/01_ventas_limpias.csv  (salida de M1)
-Salida:  dataset/processed/02_serie_semanal.csv   (una fila por plato y semana)
-Especificación: pipeline/M2_serie_semanal.md
-
-Pasos:
-  1. Ingesta: leer la salida de M1 y poner la fecha como índice.
-  2. Agregación semanal: sumar por plato y semana con resample.
-  3. Rejilla completa: una fila por plato en cada una de las 157 semanas, con 0 si no vendió.
-  4. Columnas calculadas: categoría única, precio de la semana y activo.
-  5. Reglas de negocio: estado_plato (modelable, historial_insuficiente o retirado).
-  6. Controles de calidad: comprobar que el resultado cuadra con M1 y con la tesis.
-  7. Exportación: escribir 02_serie_semanal.csv.
-
-Si un control falla, el script se detiene con un AssertionError y no escribe la salida.
-
 Uso (desde code/src, después de M1):
-  python3 m2_serie_semanal.py
+  python(3) m2_serie_semanal.py
 """
 
+<<<<<<< HEAD
 import pandas as pd # type: ignore 
 
 # Última semana del conjunto de entrenamiento 
@@ -38,6 +24,9 @@ def clasificar_plato(primera_venta, ultima_venta, inicio_ultimas_semanas):
     if semanas_historia < SEMANAS_MINIMAS:
         return 'historial_insuficiente'
     return 'modelable'
+=======
+import pandas as pd
+>>>>>>> 078b012cab935fd3821a90d3a078c99883426cfb
 
 # ---------------------------------------------------------------------------
 # 1. Ingesta
@@ -71,12 +60,11 @@ df.set_index('fecha', inplace=True)
 # S2: se suman unidades, ventas, costo y margen por plato y semana
 # ---------------------------------------------------------------------------
 
-# S1: 'W-MON' con label y closed a la izquierda agrupa de lunes a domingo y le pone a cada
-# semana la fecha de su lunes. Primero el total del restaurante, que da las 157 semanas.
+# Agrupa de lunes a domingo. W-MON: W = week  y MON = Monday.
 unidades_semana = df['cantidad'].resample('W-MON', label='left', closed='left').sum()
 
-# Unidades y ventas solo de las líneas cobradas (precio > 0). Sirven para el precio de la semana (S5),
-# para que las 8 líneas de Jolof a precio 0 no bajen el promedio. Las demás quedan en 0.
+# Unidades y ventas solo de las líneas cobradas: las 8 líneas de Jolof a precio 0 siguen contando
+# en unidades, pero no entran al cálculo del precio de la semana (S5).
 df['unidades_cobradas'] = df['cantidad'].where(df['precio_unitario'] > 0, 0)
 df['ventas_cobradas'] = df['ventas_brutas'].where(df['precio_unitario'] > 0, 0)
 
@@ -131,39 +119,16 @@ serie['categoria'] = serie['plato'].map(categoria_principal)
 primera_venta = serie[serie['unidades'] > 0].groupby('plato')['semana_inicio'].min()
 serie['activo'] = (serie['semana_inicio'] >= serie['plato'].map(primera_venta)).astype(int)
 
-# ---------------------------------------------------------------------------
-# 5. Reglas de negocio
-# Reglas de estado_plato (cap. 6, §6.1.2)
-# S7: retirado: ninguna venta en las últimas 26 semanas del periodo (desde 2025-07-07)
-#     historial_insuficiente: menos de 26 semanas entre la primera venta y el fin del entrenamiento
-#     modelable: todos los demás
-# ---------------------------------------------------------------------------
-
-# Lunes en que empiezan las últimas 26 semanas del periodo
-inicio_ultimas_semanas = semanas[-SEMANAS_MINIMAS]
-
-# Una fila por plato con su primera y última semana con ventas
-platos_resumen = serie[serie['unidades'] > 0].groupby('plato')['semana_inicio'].agg(primera_venta='min', ultima_venta='max')
-
-# S7: se aplica clasificar_plato a cada plato (axis=1 recorre las filas)
-platos_resumen['estado_plato'] = platos_resumen.apply(
-    lambda fila: clasificar_plato(fila['primera_venta'], fila['ultima_venta'], inicio_ultimas_semanas), axis=1)
-
-# Se copia el estado a todas las semanas del plato
-serie['estado_plato'] = serie['plato'].map(platos_resumen['estado_plato'])
-
-print(platos_resumen['estado_plato'].value_counts())
-
 # Columnas de salida, ordenadas por plato y semana
 columnas_salida = ['semana_inicio', 'plato', 'categoria', 'unidades', 'ventas', 'costo',
-                   'margen', 'precio_unitario', 'activo', 'estado_plato']
+                   'margen', 'precio_unitario', 'activo']
 
 serie = serie.sort_values(['plato', 'semana_inicio'])
 # Sobrescribe la tabla conservando el nuevo orden y las columnas de 'columnas_salida'
 serie = serie[columnas_salida].reset_index(drop=True)
 
 # ---------------------------------------------------------------------------
-# 6. Controles de calidad.
+# 5. Controles de calidad.
 # ---------------------------------------------------------------------------
 
 # C1: 157 semanas, de 2023-01-02 a 2025-12-29, y todas empiezan en lunes
@@ -193,12 +158,6 @@ assert (serie.groupby('plato')['categoria'].nunique() == 1).all(), 'Hay platos c
 assert serie.loc[serie['activo'] == 1, 'precio_unitario'].notna().all(), 'Hay semanas activas sin precio'
 assert not ((serie['activo'] == 0) & (serie['unidades'] > 0)).any(), 'Hay ventas en semanas inactivas'
 
-# C7: 45 modelables, 7 con historial insuficiente y 10 retirados
-conteo = platos_resumen['estado_plato'].value_counts()
-assert conteo['modelable'] == 45, f"Modelables: {conteo['modelable']}"
-assert conteo['historial_insuficiente'] == 7, f"Historial insuficiente: {conteo['historial_insuficiente']}"
-assert conteo['retirado'] == 10, f"Retirados: {conteo['retirado']}"
-
 # Avisos: no detienen el script, solo informan
 
 # A1: semanas en las que el restaurante no vendió nada (posible cierre)
@@ -213,7 +172,7 @@ print(f"A2: semanas con ventas: {(serie['unidades'] > 0).mean():.1%} de la rejil
 print(totales)
 
 # ---------------------------------------------------------------------------
-# 7. Exportación
+# 6. Exportación
 # ---------------------------------------------------------------------------
 
 serie.to_csv(ruta_salida, index=False, date_format='%Y-%m-%d', float_format='%.2f')

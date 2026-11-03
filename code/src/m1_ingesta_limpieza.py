@@ -82,7 +82,7 @@ df = df.rename(columns={
     'Est. Profit': 'margen'
 })
 
-# Quitar espacios sobrantes en los textos
+# Quitar espacios sobrantes en los textos ' soup' -> 'soup'
 for columna in df.select_dtypes(include=['object', 'string']).columns:
     df[columna] = df[columna].str.strip()
 
