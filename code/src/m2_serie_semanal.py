@@ -27,7 +27,7 @@ Uso (desde code/src, después de M1):
   python(3) m2_serie_semanal.py
 """
 
-import pandas as pd
+import pandas as pd #type: ignore
 
 # ---------------------------------------------------------------------------
 # 1. Ingesta y validación de la entrada
