@@ -10,7 +10,8 @@ Pasos:
   2. Validación de esquema: revisar filas, columnas y valores antes de tocar nada.
   3. Estandarización: renombrar columnas y unificar formatos. No quita filas.
   4. Filtrado: quitar las filas que no son ventas válidas.
-  5. Controles de calidad: comprobar que el resultado cuadra con la tesis.
+  5. Controles de calidad: comprobar que los datos son coherentes (sirve con cualquier
+     dataset que tenga las mismas columnas, sin importar cuántas filas o fechas tenga).
   6. Exportación: escribir 01_ventas_limpias.csv.
 
 Si un control falla, el script se detiene con un AssertionError y no escribe la salida.
@@ -105,9 +106,9 @@ df['categoria'] = df['categoria'].replace(categorias)
 # E3: PEPPERED TURKEY es el único plato en mayúsculas
 df['plato'] = df['plato'].replace({'PEPPERED TURKEY': 'Peppered Turkey'})
 
-# E4: días en español
+# E4: días en español. Se incluye el domingo: otro restaurante puede abrir ese día.
 dias = {'Monday': 'lunes', 'Tuesday': 'martes', 'Wednesday': 'miercoles', 'Thursday': 'jueves',
-        'Friday': 'viernes', 'Saturday': 'sabado'}
+        'Friday': 'viernes', 'Saturday': 'sabado', 'Sunday': 'domingo'}
 df['dia_semana'] = df['dia_semana'].replace(dias)
 
 # E5: RES_ORD_931.0 -> RES_ORD_931
@@ -138,30 +139,24 @@ df = df[columnas_salida].reset_index(drop=True)
 
 # ---------------------------------------------------------------------------
 # 5. Controles de calidad.
+# Los controles revisan que los datos sean coherentes, no cuántos son: así el pipeline
+# corre con cualquier dataset que tenga las columnas de C2 (por ejemplo, el mismo dataset
+# con más semanas o más pedidos).
 # ---------------------------------------------------------------------------
 
 # C1: Verifica que la fecha real coincida con la escrita en el csv.
 dias_por_numero = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
 dia_real = df['fecha'].dt.dayofweek.map(lambda i: dias_por_numero[i])
 assert (dia_real == df['dia_semana']).all(), 'Hay filas con dia_semana distinto al de la fecha'
-# C2: No hay domingos
-assert (df['dia_semana'] != 'domingo').all(), 'Hay ventas en domingo'
+# C2: Costo + margen = ventas en cada línea (si no cuadra, alguna columna viene mal)
+assert ((df['costo'] + df['margen'] - df['ventas_brutas']).abs() <= 0.005).all(), \
+    'Hay líneas donde costo + margen no es igual a ventas'
 
-# C3: Costo + margen = ventas
-assert ((df['costo'] + df['margen'] - df['ventas_brutas']).abs() <= 0.005).all() 
-
-# C4: Sumas totales
-totales = df[['cantidad', 'ventas_brutas', 'costo', 'margen']].sum().round(2)
-assert totales['cantidad'] == 7118, f"Unidades: {totales['cantidad']}"
-assert totales['ventas_brutas'] == 38480.25, f"Ventas: {totales['ventas_brutas']}"
-assert totales['costo'] == 13461.90, f"Costo: {totales['costo']}"
-assert totales['margen'] == 25018.35, f"Margen: {totales['margen']}"
-
-# C5: Sin vacíos
+# C3: Sin vacíos
 assert df.notna().all().all(), 'Hay valores vacíos'
 
-# C6: categorías conocidas
-assert set(df['categoria']) <= set(categorias.values()), 'Hay categorías sin nombre normalizado'
+# C4: después de filtrar sigue habiendo ventas (un archivo con todo cancelado no sirve)
+assert len(df) > 0, 'No quedó ninguna venta válida después del filtrado'
 
 # Avisos: no detienen el script, solo informan
 
@@ -171,6 +166,8 @@ print(f"C10: las fechas van de {df['fecha'].min().date()} a {df['fecha'].max().d
 # A2: líneas con precio 0
 print(f"C13: {(df['precio_unitario'] == 0).sum()} líneas con precio 0")
 
+# Totales del archivo, para dejar evidencia de lo que se procesó
+totales = df[['cantidad', 'ventas_brutas', 'costo', 'margen']].sum().round(2)
 print(totales)
 
 # ---------------------------------------------------------------------------

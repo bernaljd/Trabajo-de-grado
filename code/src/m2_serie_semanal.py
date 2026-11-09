@@ -158,16 +158,17 @@ serie = serie[columnas_salida].reset_index(drop=True)
 # 6. Controles de calidad.
 # ---------------------------------------------------------------------------
 
-# C1: el período debe contener las 157 semanas esperadas, desde 2023-01-02
-# hasta 2025-12-29, y todas las semanas deben comenzar en lunes.
-assert len(semanas) == 157, f'Semanas: {len(semanas)}'
-assert str(semanas[0].date()) == '2023-01-02' and str(semanas[-1].date()) == '2025-12-29', 'El periodo no es el esperado'
-assert (serie['semana_inicio'].dt.dayofweek == 0).all(), 'Hay semanas que no empiezan en lunes'
+# Los controles revisan la estructura de la serie, no su tamaño: así M2 sirve con
+# cualquier dataset que salga de M1.
 
-# C2: la rejilla debe contener 62 platos por 157 semanas, es decir, 9.734
-# filas, y no puede repetir un mismo par plato-semana.
-assert serie['plato'].nunique() == 62, f"Platos: {serie['plato'].nunique()}"
-assert len(serie) == 9734, f'Filas: {len(serie)}'
+# C1: todas las semanas comienzan en lunes y van seguidas, sin semanas faltantes
+# entre la primera y la última (cada una está 7 días después de la anterior).
+assert (serie['semana_inicio'].dt.dayofweek == 0).all(), 'Hay semanas que no empiezan en lunes'
+assert (pd.Series(semanas).diff().dropna() == pd.Timedelta(days=7)).all(), 'Faltan semanas en el periodo'
+
+# C2: la rejilla tiene una fila por cada plato y cada semana (platos x semanas filas)
+# y no repite un mismo par plato-semana.
+assert len(serie) == len(platos) * len(semanas), f'Filas: {len(serie)}, esperadas {len(platos) * len(semanas)}'
 assert not serie.duplicated(['plato', 'semana_inicio']).any(), 'Hay pares plato-semana repetidos'
 
 # C3: las sumas de M2 deben coincidir con las sumas de M1. Este control
@@ -176,8 +177,6 @@ assert not serie.duplicated(['plato', 'semana_inicio']).any(), 'Hay pares plato-
 totales = serie[['unidades', 'ventas', 'costo', 'margen']].sum().round(2)
 totales_m1 = df[['cantidad', 'ventas_brutas', 'costo', 'margen']].sum().round(2)
 assert (totales.values == totales_m1.values).all(), 'Las sumas no coinciden con M1'
-assert totales['unidades'] == 7118, f"Unidades: {totales['unidades']}"
-assert totales['ventas'] == 38480.25, f"Ventas: {totales['ventas']}"
 
 # C4: las variables agregadas de demanda y dinero no pueden ser negativas.
 assert (serie[['unidades', 'ventas', 'costo', 'margen']] >= 0).all().all(), 'Hay valores negativos'
