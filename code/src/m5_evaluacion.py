@@ -5,20 +5,20 @@ Entrada: dataset/processed/03_ventanas_mm4.csv          (salida de M3)
          dataset/processed/03_ventanas_xgboost.csv      (mismas filas; variables del gradient boosting)
          dataset/processed/03_ventanas_lstm.csv         (mismas filas)
          dataset/processed/04_entrenamiento.csv         (salida de M4: escala de la LSTM y modelo vigente)
-         modelos/gradient_boosting.joblib y modelos/lstm.keras   (salida de M4)
+         modelos/gradient_boosting.joblib, lstm.keras, arima.joblib y sarima.joblib   (salida de M4)
 Salida:  dataset/processed/05_predicciones.csv          (una fila por plato y semana de prueba)
          dataset/processed/05_metricas.csv              (una fila por modelo, más la referencia «siempre 0»)
          dataset/processed/05_matriz_confusion.csv      (semanas con venta, por modelo)
 Especificación: pipeline/DISENO_PIPELINE.md (sección M5) y pipeline/M5_evaluacion.md
 
 Pasos:
-  1. Ingesta y validación: leer las ventanas de M3, el resultado de M4 y los dos modelos.
+  1. Ingesta y validación: leer las ventanas de M3, el resultado de M4 y los cuatro modelos.
   2. Conjunto de prueba y nivel: tomar las 26 semanas de prueba y calcular el nivel de cada fila
      igual que en M4.
-  3. Predicciones: MM4, GradientBoosting y LSTM pronostican cada fila de prueba, en unidades.
+  3. Predicciones: MM4, GradientBoosting, LSTM, ARIMA y SARIMA pronostican cada fila de prueba, en unidades.
   4. Métricas: MAE, RMSE y SMAPE (OE4); accuracy, precision, recall y F1 de las semanas con
      venta; y WAPE, MASE, MAE en semanas con venta y sesgo. Se agrega la referencia «siempre 0».
-  5. Comparación con MM4: en cuántas de las 3 métricas del OE4 gana cada modelo de ML.
+  5. Comparación con MM4: en cuántas de las 3 métricas del OE4 gana cada modelo (ML y estadísticos).
   6. Controles de calidad: comprobar filas, predicciones y métricas.
   7. Exportación: escribir 05_predicciones.csv, 05_metricas.csv y 05_matriz_confusion.csv.
 
@@ -39,6 +39,9 @@ import numpy as np # type: ignore
 from sklearn.metrics import mean_absolute_error, mean_squared_error # type: ignore
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix # type: ignore
 import sklearn # type: ignore
+import warnings
+import statsmodels # type: ignore
+from statsmodels.tsa.statespace.sarimax import SARIMAX # type: ignore
 import tensorflow as tf # type: ignore
 
 # Las mismas constantes de M4: si cambian allá, cambian aquí
@@ -76,6 +79,8 @@ ruta_lstm = '../../dataset/processed/03_ventanas_lstm.csv'
 ruta_entrenamiento = '../../dataset/processed/04_entrenamiento.csv'
 ruta_modelo_gb = '../../modelos/gradient_boosting.joblib'
 ruta_modelo_lstm = '../../modelos/lstm.keras'
+ruta_modelo_arima = '../../modelos/arima.joblib'
+ruta_modelo_sarima = '../../modelos/sarima.joblib'
 ruta_predicciones = '../../dataset/processed/05_predicciones.csv'
 ruta_metricas = '../../dataset/processed/05_metricas.csv'
 ruta_matriz = '../../dataset/processed/05_matriz_confusion.csv'
@@ -87,9 +92,12 @@ entrenamiento = pd.read_csv(ruta_entrenamiento)
 # joblib.load devuelve el HistGradientBoostingRegressor tal como lo guardó M4
 modelo_gb = joblib.load(ruta_modelo_gb)
 modelo_lstm = tf.keras.models.load_model(ruta_modelo_lstm)
+# ARIMA y SARIMA: diccionario con el orden, la parte estacional y los parámetros de cada plato (None si falló)
+modelos_arima = {'ARIMA': joblib.load(ruta_modelo_arima), 'SARIMA': joblib.load(ruta_modelo_sarima)}
 
 print('M5 Evaluación en prueba')
-print(f'Versiones: pandas {pd.__version__}, scikit-learn {sklearn.__version__}, tensorflow {tf.__version__}')
+print(f'Versiones: pandas {pd.__version__}, scikit-learn {sklearn.__version__}, tensorflow {tf.__version__}, '
+      f'statsmodels {statsmodels.__version__}')
 
 columnas_comunes = ['fila_id', 'plato', 'semana_objetivo', 'conjunto', 'y_real']
 
@@ -140,6 +148,9 @@ predicciones = mm4.loc[es_prueba, columnas_comunes].reset_index(drop=True)
 # F2: el gradient boosting usa las mismas variables que en M4, más media_8, y en el mismo orden
 # F3: la LSTM usa la escala 0-1 que guardó M4 (filas LSTM_escalado), calculada con entrenamiento
 # F4: una predicción negativa se lleva a 0 unidades, como en M4
+# F5: ARIMA y SARIMA usan los parámetros que dejó M4 (reentrenados con entrenamiento + validación) y pronostican
+#     cada semana de prueba una semana adelante, con las unidades reales de las semanas anteriores del plato.
+#     Un plato sin parámetros (la estimación falló en M4) usa MM4, como en M4
 # ---------------------------------------------------------------------------
 
 # F1: MM4
@@ -176,8 +187,32 @@ minimo_ur, maximo_ur = escala['ur']
 relativa = modelo_lstm.predict(X_prueba_lstm, verbose=0).ravel() * (maximo_ur - minimo_ur) + minimo_ur
 predicciones['pred_lstm'] = relativa * nivel_prueba
 
+# F5: ARIMA y SARIMA, plato por plato. La serie de cada plato va hasta su última semana de prueba y el
+# pronóstico de una semana adelante solo usa las semanas anteriores; los parámetros quedan fijos (filter)
+for nombre_modelo, columna in [('ARIMA', 'pred_arima'), ('SARIMA', 'pred_sarima')]:
+    guardado = modelos_arima[nombre_modelo]
+    predicciones[columna] = np.nan
+    pred_por_fila = pd.Series(np.nan, index=mm4['fila_id'])
+    for plato, filas in mm4.sort_values(['plato', 'semana_objetivo']).groupby('plato'):
+        parametros = guardado['parametros'].get(plato)
+        if parametros is None:
+            continue
+        orden, estacional = guardado['orden'], guardado['estacional']
+        tendencia = 'c' if orden[1] == 0 and estacional[1] == 0 else 'n'
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            pronostico = SARIMAX(filas['y_real'].to_numpy(dtype=float), order=orden, seasonal_order=estacional,
+                                 trend=tendencia).filter(parametros).fittedvalues
+        pred_por_fila[filas['fila_id'].to_numpy()] = pronostico
+    predicciones[columna] = pred_por_fila[predicciones['fila_id'].to_numpy()].to_numpy()
+    # Platos sin parámetros o con valores no finitos: MM4
+    sin_valor = ~np.isfinite(predicciones[columna])
+    predicciones.loc[sin_valor, columna] = predicciones.loc[sin_valor, 'pred_mm4']
+    print(f'{nombre_modelo}: {sin_valor.sum()} filas de prueba con MM4 por falta de parámetros')
+
 # F4: sin predicciones negativas
-columnas_pred = {'MM4': 'pred_mm4', 'GradientBoosting': 'pred_gradient_boosting', 'LSTM': 'pred_lstm'}
+columnas_pred = {'MM4': 'pred_mm4', 'GradientBoosting': 'pred_gradient_boosting', 'LSTM': 'pred_lstm',
+                 'ARIMA': 'pred_arima', 'SARIMA': 'pred_sarima'}
 for columna in columnas_pred.values():
     predicciones[columna] = predicciones[columna].clip(lower=0)
 
@@ -247,14 +282,14 @@ metricas['accuracy_sobre_cero'] = metricas['accuracy'] - accuracy_cero
 # ---------------------------------------------------------------------------
 # 5. Comparación con MM4
 # Reglas de la comparación
-# K1: un modelo de ML tiene éxito si supera a MM4 en al menos 2 de las 3 métricas del OE4
+# K1: un modelo (ML o estadístico) tiene éxito si supera a MM4 en al menos 2 de las 3 métricas del OE4
 #     (MAE, RMSE y SMAPE) en prueba. Si no lo logra, se reporta tal cual
 # K2: el vigente es el que eligió M4 con validación; M5 no lo cambia (P2)
 # ---------------------------------------------------------------------------
 
 fila_mm4 = metricas[metricas['modelo'] == 'MM4'].iloc[0]
-es_ml = metricas['modelo'].isin(['GradientBoosting', 'LSTM'])
-# K1: cuenta las métricas en que el modelo tiene menos error que MM4. Solo se cuenta en los modelos de ML.
+es_ml = metricas['modelo'].isin(['GradientBoosting', 'LSTM', 'ARIMA', 'SARIMA'])
+# K1: cuenta las métricas en que el modelo tiene menos error que MM4. Se cuenta en todos los modelos menos MM4 y la referencia.
 metricas['supera_mm4'] = [sum(fila[m] < fila_mm4[m] for m in ['mae', 'rmse', 'smape']) if ml else None
                           for (_, fila), ml in zip(metricas.iterrows(), es_ml)]
 metricas['exito'] = [('sí' if fila['supera_mm4'] >= 2 else 'no') if ml else None
@@ -271,7 +306,7 @@ metricas = metricas[columnas_metricas].reset_index(drop=True)
 metricas['supera_mm4'] = metricas['supera_mm4'].astype('Int64')
 
 columnas_salida = ['fila_id', 'plato', 'semana_objetivo', 'conjunto', 'y_real',
-                   'pred_mm4', 'pred_gradient_boosting', 'pred_lstm']
+                   'pred_mm4', 'pred_gradient_boosting', 'pred_lstm', 'pred_arima', 'pred_sarima']
 predicciones = predicciones[columnas_salida].reset_index(drop=True)
 
 # ---------------------------------------------------------------------------
@@ -287,7 +322,7 @@ assert (predicciones['conjunto'] == 'prueba').all(), 'Hay filas que no son de pr
 valores = predicciones[list(columnas_pred.values())]
 assert np.isfinite(valores).all().all() and (valores >= 0).all().all(), 'Hay predicciones vacías o negativas'
 # C4: una fila de métricas por modelo más la referencia, sin vacíos
-assert list(metricas['modelo']) == ['MM4', 'GradientBoosting', 'LSTM', 'Siempre 0'], 'Faltan modelos en las métricas'
+assert list(metricas['modelo']) == ['MM4', 'GradientBoosting', 'LSTM', 'ARIMA', 'SARIMA', 'Siempre 0'], 'Faltan modelos en las métricas'
 assert metricas.drop(columns=['supera_mm4', 'exito']).notna().all().all(), 'Hay métricas vacías'
 # C5: cada matriz de confusión suma todas las filas de prueba
 assert (matriz_confusion[['vp', 'fp', 'fn', 'vn']].sum(axis=1) == len(predicciones)).all(), \
