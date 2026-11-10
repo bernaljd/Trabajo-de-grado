@@ -45,13 +45,7 @@ HISTORIA_LSTM = 8
 # Un plato necesita al menos 26 semanas de historia para entrar a los modelos.
 SEMANAS_MINIMAS = 26
 
-
-"""  
-Los modelos de series de tiempo necesitan una longitud mínima de secuencia para 
-identificar patrones, tendencias o estacionalidad. Al transformar las fechas absolutas 
-en una métrica relativa (semanas de existencia), se obtiene un criterio matemático limpio para filtrar.
-"""
-
+# Clasifica si un plato es modelable o no
 def clasificar_plato(primera_venta, ultima_venta, fin_entrenamiento, inicio_ultimas):
     # Semanas desde la primera venta hasta el último lunes de entrenamiento (contando ambas).
     # Un plato que no vendió nada en entrenamiento queda con 0 semanas de historia.
