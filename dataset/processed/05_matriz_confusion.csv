@@ -1,0 +1,5 @@
+modelo,vp,fp,fn,vn
+MM4,144,225,108,745
+GradientBoosting,34,28,218,942
+LSTM,114,122,138,848
+Siempre 0,0,0,252,970

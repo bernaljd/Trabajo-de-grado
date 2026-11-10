@@ -5,9 +5,11 @@ Entrada: dataset/processed/03_ventanas_mm4.csv        (salida de M3)
          dataset/processed/03_ventanas_xgboost.csv    (mismas filas)
          dataset/processed/03_ventanas_lstm.csv       (mismas filas)
 Salida:  dataset/processed/04_entrenamiento.csv       (una fila por combinación probada)
-         dataset/processed/04_matriz_confusion.csv    (semanas con venta: MM4 y los dos ganadores)
+         dataset/processed/04_matriz_confusion.csv    (semanas con venta: MM4 y los cuatro ganadores)
          modelos/gradient_boosting.joblib             (gradient boosting ganador, reentrenado)
          modelos/lstm.keras                           (LSTM ganadora, reentrenada)
+         modelos/arima.joblib                         (ARIMA ganador, reentrenado: parámetros de cada plato)
+         modelos/sarima.joblib                        (SARIMA ganador, reentrenado: parámetros de cada plato)
 Especificación: pipeline/DISENO_PIPELINE.md (sección M4) y pipeline/M4_entrenamiento.md
 
 Pasos:
@@ -19,10 +21,11 @@ Pasos:
      relativas al nivel reciente.
   5. LSTM: escalar a 0-1 con entrenamiento y grid search de 32 combinaciones con parada temprana.
      Las 3 mejores se repiten con 5 semillas y se comparan por su promedio.
-  6. Selección: el menor MAE en validación gana en cada modelo, y entre GradientBoosting y LSTM.
-  7. Reentrenamiento: los dos ganadores se entrenan con entrenamiento + validación.
-  8. Controles de calidad: comprobar combinaciones, métricas y ganadores.
-  9. Exportación: escribir 04_entrenamiento.csv y los dos modelos.
+  6. ARIMA y SARIMA (statsmodels): una serie por plato, sin ventanas. Grid search de 18 combinaciones cada uno.
+  7. Selección: el menor MAE en validación gana en cada modelo, y entre GradientBoosting y LSTM.
+  8. Reentrenamiento: los cuatro ganadores se entrenan con entrenamiento + validación.
+  9. Controles de calidad: comprobar combinaciones, métricas y ganadores.
+ 10. Exportación: escribir 04_entrenamiento.csv y los cuatro modelos.
 
 Si un control falla, el script se detiene con un AssertionError y no escribe la salida.
 
@@ -32,6 +35,7 @@ Uso (desde code/src, después de M3):
 
 import os
 import joblib # type: ignore 
+import warnings
 
 # Quita los mensajes de arranque de TensorFlow, que no dicen nada de los datos
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -43,63 +47,80 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.model_selection import ParameterGrid # type: ignore 
 from sklearn.ensemble import HistGradientBoostingRegressor # type: ignore 
 import sklearn # type: ignore 
+import statsmodels # type: ignore 
+from statsmodels.tsa.statespace.sarimax import SARIMAX # type: ignore 
 import tensorflow as tf # type: ignore 
 
 # Hace que TensorFlow dé el mismo resultado en cada corrida con la misma semilla
 tf.config.experimental.enable_op_determinism()
 
-# Semilla de todas las ejecuciones
+# Semilla de todas las ejecuciones (criterio CA-08)
 SEMILLA = 42
 # Semillas con las que se repiten las mejores LSTM, porque su resultado cambia con la semilla
 SEMILLAS_REPETICION = [42, 43, 44, 45, 46]
-# Cuantas de las mejores combinaciones de la LSTM se repiten con las 5 semillas
+# Cuántas de las mejores combinaciones de la LSTM se repiten con las 5 semillas
 MEJORES_LSTM = 3
-# Define las ventanas hacia atras.
+# Semanas de la ventana de la LSTM y variables que tiene cada semana.
+# 'ur' son las unidades relativas al nivel reciente del plato.
 HISTORIA_LSTM = 8
 VARIABLES_LSTM = ['ur', 'precio', 'sin', 'cos']
-# Se suma al nivel para poder dividir cuando las 8 semanas anteriores fueron 0 (evita dividir entre 0)
+# Se suma al nivel para poder dividir cuando las 8 semanas anteriores fueron 0
 NIVEL_MINIMO = 0.1
 # Un pronóstico de 0,5 unidades o más cuenta como «predice venta»: redondeado da al menos 1 unidad.
 # Con este umbral se calculan accuracy, precision, recall, F1 y la matriz de confusión.
 UMBRAL_VENTA = 0.5
-# Parada temprana: gradient boosting hasta 1.000 árboles y se detiene si 50 seguidos no mejoran.
-# La LSTM hasta 200 épocas y se detiene si 10 seguidas no mejoran.
+# Parada temprana: gradient boosting hasta 1.000 árboles y para si 50 seguidos no mejoran.
+# La LSTM hasta 200 épocas y para si 10 seguidas no mejoran.
 MAX_ARBOLES = 1000
 PACIENCIA_ARBOLES = 50
 MAX_EPOCAS = 200
-PACIENCIA_EPOCAS = 10   
+PACIENCIA_EPOCAS = 10
 
+# Grilla del gradient boosting (equivale al Cuadro 6.2, con los nombres de scikit-learn):
+# 3 x 3 x 2 x 2 x 2 x 2 = 144 combinaciones.
+# loss: absolute_error entrena con el MAE, la métrica con la que se elige al ganador; poisson
+#   está hecha para conteos con muchos ceros (reemplaza a Tweedie, que scikit-learn no tiene).
+# max_features: fracción de columnas que mira cada división (colsample_bytree en GradientBoosting).
+# min_samples_leaf: filas mínimas en cada hoja (cumple el papel de min_child_weight).
+# l2_regularization: castiga las hojas con valores grandes para que no memorice (lambda en GradientBoosting).
 GRILLA_GB = {
-    # la metrica matematica que el modelo quiere minimizar. (Ataca a MAE).
     'loss': ['absolute_error', 'squared_error', 'poisson'],
-    # profundidad del arbol.
     'max_depth': [3, 4, 6],
-    # Que tanto se aporta a la prediccion final por cada arbol.
     'learning_rate': [0.03, 0.1],
-    # variabilidad para forzar variacion en los arboles.
     'max_features': [0.8, 1.0],
-    # Cantidad minima de ejemplos que debe quedar en una rama.
     'min_samples_leaf': [5, 20],
-    # Castigo matematico para mantener los arboles simples.
     'l2_regularization': [0.0, 1.0],
 }
 # Grilla de la LSTM: 2 valores por hiperparámetro, 2^5 = 32 combinaciones
 GRILLA_LSTM = {
-    # Define las capas de la red
     'capas': [1, 2],
-    # Define las neuronas de la memoria
     'unidades': [16, 32],
-    # Apaga algunas neuronas para no depender de una señal
     'dropout': [0.1, 0.3],
     'learning_rate': [0.001, 0.01],
     'batch_size': [32, 64],
 }
 
 
+# Grilla del ARIMA: p (autorregresivo) x d (diferencias) x q (media móvil) = 3 x 2 x 3 = 18 combinaciones.
+# El ARIMA no tiene parte estacional: estacional = (0, 0, 0, 0).
+GRILLA_ARIMA = {
+    'orden': [(p, d, q) for p in [0, 1, 2] for d in [0, 1] for q in [0, 1, 2]],
+    'estacional': [(0, 0, 0, 0)],
+}
+# Grilla del SARIMA: 3 órdenes x 3 partes estacionales x 2 períodos = 18 combinaciones.
+# El período es en semanas: 4 (un mes) o 13 (un trimestre). El año (52) no se prueba: con unas 100 semanas
+# de entrenamiento por plato solo cabrían dos ciclos y el modelo no se podría estimar.
+GRILLA_SARIMA = {
+    'orden': [(1, 0, 0), (1, 0, 1), (0, 1, 1)],
+    'estacional': [(P, D, Q, s) for (P, D, Q) in [(1, 0, 0), (0, 0, 1), (0, 1, 1)] for s in [4, 13]],
+}
+
+
 def combinaciones(grilla):
     # Grid search: ParameterGrid de scikit-learn arma todas las combinaciones de la grilla,
     # cada una como un diccionario {hiperparámetro: valor}. Cada combinación se entrena con
-    # 'entrenamiento' y se mide en 'validacion'.
+    # 'entrenamiento' y se mide en 'validacion' (no se usa GridSearchCV porque su validación cruzada
+    # mezclaría semanas y no permite la parada temprana sobre validación).
     return list(ParameterGrid(grilla))
 
 
@@ -107,7 +128,7 @@ def a_texto(parametros):
     # Hiperparámetros en texto legible para el CSV, por ejemplo 'max_depth=4; learning_rate=0.03'
     return '; '.join(f'{nombre}={valor}' for nombre, valor in parametros.items())
 
-# Symmetric Mean Absolute Percentage Error
+
 def smape(y_real, y_pred):
     # SMAPE en %: 2|real - pred| / (|real| + |pred|). Cuando ambos son 0 el error es 0, no una división por 0.
     denominador = np.abs(y_real) + np.abs(y_pred)
@@ -134,7 +155,7 @@ def metricas(y_real, y_pred):
             # F1: equilibrio entre precision y recall
             'f1_validacion': f1_score(vende_real, vende_pred, zero_division=0)}
 
-# tridimensional para la lectura deade el LSTM
+
 def a_cubo(tabla, columnas_fijas):
     # Arma la entrada de la LSTM con forma (muestras, 8 pasos, variables).
     # Para cada variable se toman sus columnas de t-8 a t-1, así el paso 0 es la semana más antigua.
@@ -142,7 +163,7 @@ def a_cubo(tabla, columnas_fijas):
                       for variable in VARIABLES_LSTM], axis=2)
     # El plato y el nivel no cambian en la ventana: se repiten en los 8 pasos
     fijas = np.repeat(tabla[columnas_fijas].to_numpy()[:, np.newaxis, :], HISTORIA_LSTM, axis=1)
-    return np.concatenate([pasos, fijas], axis=2).astype('float32') 
+    return np.concatenate([pasos, fijas], axis=2).astype('float32')
 
 
 def crear_lstm(parametros, n_variables, semilla):
@@ -161,6 +182,36 @@ def crear_lstm(parametros, n_variables, semilla):
     return modelo
 
 
+def armar_sarimax(serie, orden, estacional):
+    # Con una diferencia (d o D) la media ya se resta sola; sin diferencias se estima una constante (trend='c')
+    tendencia = 'c' if orden[1] == 0 and estacional[1] == 0 else 'n'
+    return SARIMAX(serie, order=orden, seasonal_order=estacional, trend=tendencia)
+
+
+def ajustar_sarimax(serie, orden, estacional):
+    # Estima los parámetros de un plato con su serie. Devuelve None si la estimación falla.
+    try:
+        with warnings.catch_warnings():
+            # statsmodels avisa de convergencia en series muy ceradas; el resultado se revisa abajo
+            warnings.simplefilter('ignore')
+            parametros = armar_sarimax(serie, orden, estacional).fit(disp=False, maxiter=50).params
+        return parametros if np.isfinite(parametros).all() else None
+    except Exception:
+        return None
+
+
+def un_paso(serie, orden, estacional, parametros):
+    # Pronóstico de una semana adelante para cada punto de la serie: usa solo las semanas anteriores y los
+    # parámetros fijos (filter no los vuelve a estimar). Devuelve None si algún valor no es finito.
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            pronostico = armar_sarimax(serie, orden, estacional).filter(parametros).fittedvalues
+        return pronostico if np.isfinite(pronostico).all() else None
+    except Exception:
+        return None
+
+
 # ---------------------------------------------------------------------------
 # 1. Ingesta y validación
 # ---------------------------------------------------------------------------
@@ -173,13 +224,16 @@ ruta_salida = '../../dataset/processed/04_entrenamiento.csv'
 ruta_matriz = '../../dataset/processed/04_matriz_confusion.csv'
 ruta_modelo_gb = '../../modelos/gradient_boosting.joblib'
 ruta_modelo_lstm = '../../modelos/lstm.keras'
+ruta_modelo_arima = '../../modelos/arima.joblib'
+ruta_modelo_sarima = '../../modelos/sarima.joblib'
 
 mm4 = pd.read_csv(ruta_mm4)
 ventanas_xgboost = pd.read_csv(ruta_xgboost)
 ventanas_lstm = pd.read_csv(ruta_lstm)
 
 print('M4 Entrenamiento')
-print(f'Versiones: pandas {pd.__version__}, scikit-learn {sklearn.__version__}, tensorflow {tf.__version__}')
+print(f'Versiones: pandas {pd.__version__}, scikit-learn {sklearn.__version__}, tensorflow {tf.__version__}, '
+      f'statsmodels {statsmodels.__version__}')
 
 columnas_comunes = ['fila_id', 'plato', 'semana_objetivo', 'conjunto', 'y_real']
 
@@ -374,18 +428,74 @@ for numero in mejores_lstm:
           flush=True)
 
 # ---------------------------------------------------------------------------
-# 6. Selección
+# 6. ARIMA y SARIMA (statsmodels)
+# Reglas de ARIMA y SARIMA
+# T1: sin ventanas. Cada plato tiene su propia serie, las unidades de sus semanas en orden, y cada
+#     combinación de la grilla se estima plato por plato (el mismo orden para todos los platos)
+# T2: los parámetros de cada plato se estiman solo con sus semanas de 'entrenamiento'. En validación el
+#     pronóstico es de una semana adelante: usa las unidades reales de las semanas anteriores, con los
+#     parámetros fijos. Es la misma información que reciben los otros modelos en cada fila
+# T3: si un plato no se puede estimar (la estimación falla o da valores no finitos), esa combinación usa
+#     para ese plato el promedio de sus 4 semanas anteriores (MM4). Cuántos platos fallan queda en el texto (fallas)
+# T4: la serie de cada plato llega hasta su última semana de validación; las filas de prueba no se leen (S2)
+# ---------------------------------------------------------------------------
+
+# T1 y T4: posiciones de las filas de cada plato en orden de semana, solo entrenamiento y validación
+posiciones_plato = {}
+for plato, filas in mm4[es_train | es_validacion].sort_values(['plato', 'semana_objetivo']).groupby('plato'):
+    posiciones_plato[plato] = filas.index.to_numpy()
+series_plato = {plato: mm4.loc[posiciones, 'y_real'].to_numpy(dtype=float) for plato, posiciones in posiciones_plato.items()}
+filas_train_plato = {plato: int(es_train[posiciones].sum()) for plato, posiciones in posiciones_plato.items()}
+# Las filas de entrenamiento van antes que las de validación en cada plato
+for plato, posiciones in posiciones_plato.items():
+    assert es_train[posiciones].to_numpy()[:filas_train_plato[plato]].all(), 'Hay semanas de validación antes de entrenamiento'
+# MM4 de cada fila de validación, para los platos que fallan (T3)
+mm4_por_posicion = pd.Series(mm4[['u_t1', 'u_t2', 'u_t3', 'u_t4']].mean(axis=1).to_numpy(), index=mm4.index)
+
+
+def probar_sarimax(orden, estacional):
+    # T2: estima con entrenamiento y pronostica validación una semana adelante, plato por plato.
+    # Devuelve la predicción de validación en el orden de mm4 y cuántos platos fallaron.
+    pred = pd.Series(np.nan, index=mm4.index)
+    fallas = 0
+    for plato, posiciones in posiciones_plato.items():
+        n = filas_train_plato[plato]
+        parametros = ajustar_sarimax(series_plato[plato][:n], orden, estacional)
+        pronostico = None if parametros is None else un_paso(series_plato[plato], orden, estacional, parametros)
+        if pronostico is None:
+            # T3: el plato usa MM4 en esta combinación
+            fallas += 1
+            pred[posiciones[n:]] = mm4_por_posicion[posiciones[n:]]
+        else:
+            pred[posiciones[n:]] = pronostico[n:]
+    # En el orden de las filas de validación de mm4
+    return pred[es_validacion].to_numpy(), fallas
+
+
+grillas_arima = {'ARIMA': combinaciones(GRILLA_ARIMA), 'SARIMA': combinaciones(GRILLA_SARIMA)}
+for nombre_modelo, grilla in grillas_arima.items():
+    for numero, ajustes in enumerate(grilla, start=1):
+        pred, fallas = probar_sarimax(ajustes['orden'], ajustes['estacional'])
+        predicciones[(nombre_modelo, numero)] = pred
+        resultados.append({'modelo': nombre_modelo, 'combinacion': numero,
+                           'hiperparametros': a_texto({**ajustes, 'fallas': fallas}),
+                           'semilla': None, **metricas(y_validacion, pred)})
+    print(f'{nombre_modelo}: {len(grilla)} combinaciones probadas', flush=True)
+
+# ---------------------------------------------------------------------------
+# 7. Selección
 # Reglas de selección
 # G1: en cada modelo gana la combinación con menor MAE en validación. En la LSTM compiten los
 #     promedios de 5 semillas (L4)
-# G2: entre GradientBoosting y LSTM, el de menor MAE en validación es el modelo vigente
+# G2: entre GradientBoosting y LSTM, el de menor MAE en validación es el modelo vigente. ARIMA, SARIMA y MM4
+#     se comparan con él, pero no lo reemplazan hasta decidirlo con los resultados de todos
 # ---------------------------------------------------------------------------
 
 entrenamiento = pd.DataFrame(resultados)
 
 # G1: idxmin da la fila con el menor MAE dentro de cada modelo que compite
 entrenamiento['mejor_del_modelo'] = 'no'
-compiten = entrenamiento['modelo'].isin(['MM4', 'GradientBoosting', 'LSTM_promedio'])
+compiten = entrenamiento['modelo'].isin(['MM4', 'GradientBoosting', 'LSTM_promedio', 'ARIMA', 'SARIMA'])
 mejores = entrenamiento[compiten].groupby('modelo')['mae_validacion'].idxmin()
 entrenamiento.loc[mejores, 'mejor_del_modelo'] = 'sí'
 
@@ -398,11 +508,13 @@ entrenamiento['vigente'] = 'no'
 entrenamiento.loc[fila_vigente, 'vigente'] = 'sí'
 
 # ---------------------------------------------------------------------------
-# 7. Reentrenamiento
+# 8. Reentrenamiento
 # Reglas del reentrenamiento
-# R1: los dos ganadores se entrenan otra vez con entrenamiento + validación juntos, con semilla 42
+# R1: los cuatro ganadores se entrenan otra vez con entrenamiento + validación juntos, con semilla 42
 # R2: sin validación no hay parada temprana: se usan los árboles y las épocas que encontró la búsqueda
 # R3: la escala de la LSTM sigue siendo la de entrenamiento (la que queda en el CSV)
+# R4: ARIMA y SARIMA estiman los parámetros de cada plato otra vez con entrenamiento + validación; M5 los usa
+#     para pronosticar la prueba una semana adelante, con las unidades reales de las semanas anteriores
 # ---------------------------------------------------------------------------
 
 # R1: todas las filas que no son de prueba
@@ -420,6 +532,16 @@ modelo_lstm = crear_lstm(parametros_lstm, n_variables, SEMILLA)
 modelo_lstm.fit(a_cubo(lstm_escalada[es_train_validacion], columnas_fijas),
                 lstm_escalada.loc[es_train_validacion, 'y_escalada'].to_numpy(),
                 epochs=epocas_por_combinacion[combinacion_lstm], batch_size=parametros_lstm['batch_size'], verbose=0)
+
+# R4: parámetros por plato de los ganadores de ARIMA y SARIMA, con sus semanas de entrenamiento + validación
+mejores_arima = {}
+for nombre_modelo in ['ARIMA', 'SARIMA']:
+    fila = entrenamiento.loc[mejores[nombre_modelo]]
+    ajustes = grillas_arima[nombre_modelo][int(fila['combinacion']) - 1]
+    parametros_platos = {plato: ajustar_sarimax(serie, ajustes['orden'], ajustes['estacional'])
+                         for plato, serie in series_plato.items()}
+    mejores_arima[nombre_modelo] = {'orden': ajustes['orden'], 'estacional': ajustes['estacional'],
+                                    'parametros': parametros_platos}
 
 # R3: el mínimo y el máximo de cada variable van al final del CSV, para reproducir la escala.
 # El nivel mínimo también queda, porque M5 y M6 lo necesitan para volver a unidades.
@@ -442,14 +564,14 @@ entrenamiento['combinacion'] = entrenamiento['combinacion'].astype('Int64')
 entrenamiento['semilla'] = entrenamiento['semilla'].astype('Int64')
 
 # ---------------------------------------------------------------------------
-# 8. Controles de calidad
+# 9. Controles de calidad
 # ---------------------------------------------------------------------------
 
 conteo = entrenamiento['modelo'].value_counts().to_dict()
 
 # C1: se probaron todas las combinaciones del diseño
 assert conteo == {'GradientBoosting': 144, 'LSTM': 32, 'LSTM_semillas': 12, 'LSTM_promedio': 3,
-                  'LSTM_escalado': 5, 'MM4': 1, 'nivel': 1}, f'Combinaciones probadas: {conteo}'
+                  'LSTM_escalado': 5, 'MM4': 1, 'nivel': 1, 'ARIMA': 18, 'SARIMA': 18}, f'Combinaciones probadas: {conteo}'
 # C2: las métricas existen y no son negativas en todas las filas de modelos
 filas_modelo = ~entrenamiento['modelo'].isin(['LSTM_escalado', 'nivel'])
 metricas_modelo = entrenamiento.loc[filas_modelo, ['mae_validacion', 'rmse_validacion', 'smape_validacion',
@@ -458,17 +580,24 @@ metricas_modelo = entrenamiento.loc[filas_modelo, ['mae_validacion', 'rmse_valid
 assert metricas_modelo.notna().all().all() and (metricas_modelo >= 0).all().all(), 'Hay métricas vacías o negativas'
 # C3: un solo mejor por modelo y un solo vigente, que es GradientBoosting o LSTM
 assert sorted(entrenamiento.loc[entrenamiento['mejor_del_modelo'] == 'sí', 'modelo']) == \
-    ['GradientBoosting', 'LSTM_promedio', 'MM4'], 'Debe haber un mejor por modelo'
+    ['ARIMA', 'GradientBoosting', 'LSTM_promedio', 'MM4', 'SARIMA'], 'Debe haber un mejor por modelo'
 assert (entrenamiento['vigente'] == 'sí').sum() == 1, 'Debe haber un solo modelo vigente de ML'
 # C4: los modelos reentrenados predicen todas las filas sin vacíos
 assert np.isfinite(modelo_gb.predict(X_validacion_gb)).all(), 'GradientBoosting reentrenado da valores vacíos'
 assert np.isfinite(modelo_lstm.predict(X_validacion_lstm, verbose=0)).all(), 'LSTM reentrenada da valores vacíos'
 
+# C5: los parámetros reentrenados existen para los platos que se pudieron estimar y no tienen valores vacíos
+for nombre_modelo, guardado in mejores_arima.items():
+    estimados = [p for p in guardado['parametros'].values() if p is not None]
+    assert len(estimados) > 0, f'{nombre_modelo} no se pudo estimar para ningún plato'
+    assert all(np.isfinite(p).all() for p in estimados), f'{nombre_modelo} reentrenado tiene valores no finitos'
+
 # Avisos: no detienen el script, solo informan
 
-# A1: si el mejor modelo de ML no le gana a MM4 en validación, M5 probablemente tampoco lo verá en prueba
+# A1: si el mejor de cada modelo no le gana a MM4 en validación, M5 probablemente tampoco lo verá en prueba
 fila_mm4 = entrenamiento[entrenamiento['modelo'] == 'MM4'].iloc[0]
-for nombre, fila in [('GradientBoosting', mejor_gb), ('LSTM', mejor_lstm)]:
+for nombre, fila in [('GradientBoosting', mejor_gb), ('LSTM', mejor_lstm),
+                     ('ARIMA', entrenamiento.loc[mejores['ARIMA']]), ('SARIMA', entrenamiento.loc[mejores['SARIMA']])]:
     gana = sum(fila[m] < fila_mm4[m] for m in ['mae_validacion', 'rmse_validacion', 'smape_validacion'])
     print(f"A1: {nombre}: MAE {fila['mae_validacion']:.3f} frente a MM4 {fila_mm4['mae_validacion']:.3f}; "
           f"le gana en {gana} de 3 métricas")
@@ -486,18 +615,21 @@ print(f"A3: pronosticar siempre 0 da MAE {ceros['mae_validacion']:.3f} y accurac
 
 # A4: un modelo que pronostica casi siempre 0 tiene MAE bajo pero no sirve para planear compras.
 # Se comparan las unidades pronosticadas con las reales y cuántas filas quedan por debajo de 0,05.
-for nombre, fila in [('GradientBoosting', mejor_gb), ('LSTM', mejor_lstm)]:
+for nombre, fila in [('GradientBoosting', mejor_gb), ('LSTM', mejor_lstm),
+                     ('ARIMA', entrenamiento.loc[mejores['ARIMA']]), ('SARIMA', entrenamiento.loc[mejores['SARIMA']])]:
     pred = np.clip(predicciones[(fila['modelo'], int(fila['combinacion']))], 0, None)
     print(f'A4: {nombre}: pronostica {pred.sum():.0f} unidades frente a {y_validacion.sum()} reales; '
           f'{(pred < 0.05).mean():.1%} de las filas con menos de 0,05')
 
-# Matriz de confusión de «semana con venta» en validación, para MM4 y los dos ganadores.
+# Matriz de confusión de «semana con venta» en validación, para MM4 y los cuatro ganadores.
 # VP: dijo venta y hubo; FP: dijo venta y no hubo; FN: no dijo venta y hubo; VN: no dijo venta y no hubo.
 # En la LSTM se usa el promedio de las predicciones de sus 5 semillas.
 matrices = []
 for nombre, pred in [('MM4', pred_mm4),
                      ('GradientBoosting', predicciones[('GradientBoosting', int(mejor_gb['combinacion']))]),
-                     ('LSTM', predicciones[('LSTM_promedio', int(mejor_lstm['combinacion']))])]:
+                     ('LSTM', predicciones[('LSTM_promedio', int(mejor_lstm['combinacion']))]),
+                     ('ARIMA', predicciones[('ARIMA', int(entrenamiento.loc[mejores['ARIMA'], 'combinacion']))]),
+                     ('SARIMA', predicciones[('SARIMA', int(entrenamiento.loc[mejores['SARIMA'], 'combinacion']))])]:
     vn, fp, fn, vp = confusion_matrix(y_validacion > 0, np.clip(pred, 0, None) >= UMBRAL_VENTA).ravel()
     matrices.append({'modelo': nombre, 'vp': vp, 'fp': fp, 'fn': fn, 'vn': vn})
 matriz_confusion = pd.DataFrame(matrices)
@@ -512,7 +644,7 @@ print(f"Hiperparámetros GradientBoosting: {mejor_gb['hiperparametros']}")
 print(f"Hiperparámetros LSTM: {mejor_lstm['hiperparametros']}")
 
 # ---------------------------------------------------------------------------
-# 9. Exportación
+# 10. Exportación
 # ---------------------------------------------------------------------------
 
 # Crea la carpeta modelos si no existe
@@ -520,7 +652,10 @@ os.makedirs('../../modelos', exist_ok=True)
 # joblib guarda el modelo de scikit-learn tal cual, para cargarlo en M5 con joblib.load
 joblib.dump(modelo_gb, ruta_modelo_gb)
 modelo_lstm.save(ruta_modelo_lstm)
+# ARIMA y SARIMA: orden, parte estacional y parámetros de cada plato
+joblib.dump(mejores_arima['ARIMA'], ruta_modelo_arima)
+joblib.dump(mejores_arima['SARIMA'], ruta_modelo_sarima)
 # Cuatro decimales en las métricas
 entrenamiento.to_csv(ruta_salida, index=False, float_format='%.4f')
 matriz_confusion.to_csv(ruta_matriz, index=False)
-print(f'{len(entrenamiento)} filas -> {ruta_salida}; modelos -> {ruta_modelo_gb}, {ruta_modelo_lstm}')
+print(f'{len(entrenamiento)} filas -> {ruta_salida}; modelos -> {ruta_modelo_gb}, {ruta_modelo_lstm}, {ruta_modelo_arima}, {ruta_modelo_sarima}')
